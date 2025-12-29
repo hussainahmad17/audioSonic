@@ -2,9 +2,10 @@ import axios from "axios";
 
 // Allow Vercel/production to set the API origin while keeping local dev working
 const envApiBase = import.meta.env?.VITE_API_BASE_URL;
+const isLocal = typeof window !== 'undefined' && /localhost|127\.0\.0\.1/.test(window.location.hostname);
 const resolvedApiBase =
   (typeof envApiBase === "string" && envApiBase.trim()) ||
-  `${window.location.origin}/api`;
+  (isLocal ? "http://localhost:8000/api" : `${window.location.origin}/api`);
 
 export const API_BASE_URL = resolvedApiBase.replace(/\/$/, "");
 export const API_ORIGIN = API_BASE_URL.replace(/\/api$/, "");
