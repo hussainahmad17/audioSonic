@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.landing-wrapper {
+  position: relative;
+  background-color: #0d0014;
+  background-image: repeating-linear-gradient(
+    135deg,
+    #331433 0px,
+    #331433 90px,     /* wider purple line */
+    rgba(8, 0, 16, 0.9) 90px,
+    rgba(8, 0, 16, 0.9) 150px /* thinner black line */
+  );
+  background-size: cover;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.home-background {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(14px); /* ✅ Safari support */
+  background: rgba(0, 0, 0, 0.4); /* optional dark overlay */
+  z-index: 0;
+}
+
+
+.home-content {
+  position: relative;
+  z-index: 1;
+  color: #f5f5f5;
+}
+
+
+
+
+:root {
+  --primary: 224 17 95;
+  --primary-foreground: 245 245 245;
+  --background: 16 16 16;
+  --foreground: 245 245 245;
+  --border: 39 39 42;
+}
+
+.bg-primary {
+  background-color: hsl(var(--primary));
+}
+
+.text-primary-foreground {
+  color: hsl(var(--primary-foreground));
+}
+html {
+  scroll-behavior: smooth;
+}
+
+.ring-offset-background {
+  --tw-ring-offset-color: hsl(var(--background));
+}
+
+.premium-button {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/.8));
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.crimson-glow {
+  box-shadow: 0 0 20px hsl(var(--primary)/0.3);
+}
+
+.crimson-glow:hover {
+  box-shadow: 0 0 30px hsl(var(--primary)/0.5);
+}
+@keyframes glow {
+  0% { box-shadow: 0 0 5px #ffcc00; }
+  50% { box-shadow: 0 0 20px #ffcc00; }
+  100% { box-shadow: 0 0 5px #ffcc00; }
+}
+
+.animate-glow {
+  animation: glow 1.5s ease-in-out infinite;
+}
+
+.audio-wave {
+  display: flex;
+  align-items: flex-end;
+  height: 20px;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.audio-wave .bar {
+  width: 3px;
+  background-color: white;
+  animation: pulse 1s infinite ease-in-out;
+}
+
+.audio-wave .bar:nth-child(1) {
+  animation-delay: 0s;
+}
+.audio-wave .bar:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.audio-wave .bar:nth-child(3) {
+  animation-delay: 0.4s;
+}
+.audio-wave .bar:nth-child(4) {
+  animation-delay: 0.6s;
+}
+.audio-wave .bar:nth-child(5) {
+  animation-delay: 0.8s;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    height: 8px;
+  }
+  50% {
+    height: 15px;
+  }
+}
+
+/* For the modal backdrop */
+.fixed {
+  position: fixed;
+}
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.bg-opacity-70 {
+  --tw-bg-opacity: 0.7;
+}
+.z-50 {
+  z-index: 50;
+}
+
+/* For the modal content */
+.max-w-md {
+  max-width: 28rem; /* 448px */
+}
+/* #root {
+    min-height: 100vh;
+    display: flex;
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+} */
