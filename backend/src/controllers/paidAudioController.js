@@ -85,20 +85,26 @@ const addAudio = async (req, res) => {
 
 const getAllAudios = async (req, res) => {
     try {
-        // Populate category information when fetching all audios
         const audios = await PaidAudio.find()
             .populate("categoryId", "categoryName")
-            .populate("subCategoryId", "Name") // Add this line
+            .populate("subCategoryId", "Name")
             .sort({ createdAt: -1 });
 
-        // Calculate total revenue and downloads
-        const totalRevenue = audios.reduce((sum, audio) => sum + (audio.revenue || 0), 0);
-        const totalDownloads = audios.reduce((sum, audio) => sum + (audio.downloads || 0), 0);
+        const origin = req.headers.origin || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+        const audiosWithUrl = audios.map(audio => ({
+            ...audio.toObject(),
+            audioUrl: (audio.audioFile && /^https?:\/\//i.test(audio.audioFile))
+                ? audio.audioFile
+                : `${origin}/uploads/paid-audio/${audio.audioFile}`
+        }));
+
+        const totalRevenue = audiosWithUrl.reduce((sum, audio) => sum + (audio.revenue || 0), 0);
+        const totalDownloads = audiosWithUrl.reduce((sum, audio) => sum + (audio.downloads || 0), 0);
 
         return res.status(200).json({
             success: true,
-            data: audios,
-            count: audios.length,
+            data: audiosWithUrl,
+            count: audiosWithUrl.length,
             totalRevenue,
             totalDownloads
         });

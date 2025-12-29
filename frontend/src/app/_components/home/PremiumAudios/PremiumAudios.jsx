@@ -181,8 +181,12 @@ const PremiumAudios = () => {
       clearTimeout(stopTimerRef.current);
     }
 
-    // Create new audio instance
-    const audioElement = new Audio(`${AUDIO_URL}/${audio.audioFile}`);
+    // Resolve audio URL: prefer server-provided URL or cloud URL; fallback to static uploads
+    const link = audio.audioUrl
+      || (typeof audio.audioFile === 'string' && /^https?:\/\//i.test(audio.audioFile)
+          ? audio.audioFile
+          : `${AUDIO_BASE_URL}/uploads/paid-audio/${audio.audioFile}`);
+    const audioElement = new Audio(link);
     audioElement.play();
 
     // Set timeout to stop after 30 seconds
