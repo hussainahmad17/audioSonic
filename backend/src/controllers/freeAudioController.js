@@ -83,7 +83,8 @@ const getAllAudios = async (req, res) => {
             .populate("subCategoryId", "Name") // Add this line
             .sort({ createdAt: -1 });
 
-                const origin = req.headers.origin || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+                // Use backend origin (protocol + host) so generated media URLs point to the server
+                const origin = `${req.protocol}://${req.get('host')}`;
                 const audiosWithUrl = audios.map(audio => ({
                         ...audio.toObject(),
                         audioUrl: (audio.audioFile && /^https?:\/\//i.test(audio.audioFile))
@@ -183,7 +184,8 @@ const sendAudioEmail = async (req, res) => {
             }
         });
 
-                const origin = req.headers.origin || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+                // Build direct link using backend origin so email links reference the server
+                const origin = `${req.protocol}://${req.get('host')}`;
                 const directLink = (audioUrl && /^https?:\/\//i.test(audioUrl))
                     ? audioUrl
                     : `${origin}/uploads/free-audio/${audioUrl}`;

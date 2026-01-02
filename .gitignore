@@ -74,3 +74,5 @@ Thumbs.db
 
 *.sqlite
 *.db
+.vercel
+.env*.local

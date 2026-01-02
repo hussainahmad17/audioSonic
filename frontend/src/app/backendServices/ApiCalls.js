@@ -13,10 +13,36 @@ export const MEDIA_BASE_URL =
   (import.meta.env?.VITE_MEDIA_BASE_URL &&
     import.meta.env.VITE_MEDIA_BASE_URL.trim()) ||
   `${API_ORIGIN}/uploads`;
-export const AUDIO_BASE_URL =
+let _audioBase =
   (import.meta.env?.VITE_AUDIO_BASE_URL &&
     import.meta.env.VITE_AUDIO_BASE_URL.trim()) ||
   API_ORIGIN;
+
+// If frontend is served on localhost (Vite dev) and audio base accidentally resolves
+// to the frontend origin, prefer the backend API origin to avoid serving index.html
+if (typeof window !== "undefined") {
+  try {
+    if (
+      window.location.hostname &&
+      /localhost|127\.0\.0\.1/.test(window.location.hostname) &&
+      _audioBase === window.location.origin
+    ) {
+      _audioBase = API_ORIGIN;
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+export const AUDIO_BASE_URL = _audioBase;
+
+// Debug: show resolved endpoints in the browser console during development
+if (typeof window !== "undefined") {
+  // eslint-disable-next-line no-console
+  console.log("[ApiCalls] API_BASE_URL:", API_BASE_URL);
+  // eslint-disable-next-line no-console
+  console.log("[ApiCalls] AUDIO_BASE_URL:", AUDIO_BASE_URL);
+}
 
 // Create axios instance with default config
 const apiClient = axios.create({

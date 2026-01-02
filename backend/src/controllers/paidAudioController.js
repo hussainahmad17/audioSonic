@@ -90,7 +90,8 @@ const getAllAudios = async (req, res) => {
             .populate("subCategoryId", "Name")
             .sort({ createdAt: -1 });
 
-        const origin = req.headers.origin || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+        // Use backend origin (protocol + host) so generated media URLs point to the server
+        const origin = `${req.protocol}://${req.get('host')}`;
         const audiosWithUrl = audios.map(audio => ({
             ...audio.toObject(),
             audioUrl: (audio.audioFile && /^https?:\/\//i.test(audio.audioFile))
@@ -256,8 +257,8 @@ const handleConfirm = async (req, res) => {
         audio.downloads += 1;
         await audio.save();
 
-                // Construct proper audio URL; fallback for legacy local filenames
-                const origin = req.headers.origin || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+                // Construct proper audio URL using backend origin; fallback for legacy local filenames
+                const origin = `${req.protocol}://${req.get('host')}`;
                 const audioUrl = (audio.audioFile && /^https?:\/\//i.test(audio.audioFile))
                     ? audio.audioFile
                     : `${origin}/uploads/paid-audio/${audio.audioFile}`;

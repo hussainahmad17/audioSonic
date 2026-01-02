@@ -97,8 +97,14 @@ const SampleCards = () => {
     }
 
     const link = sample.audioUrl || `${AUDIO_BASE_URL}/uploads/free-audio/${sample.audioFile}`;
-    const audio = new Audio(link);
-    audio.play();
+    const audio = new Audio();
+    audio.crossOrigin = "anonymous";
+    audio.src = link;
+    audio.play().catch((err) => {
+      console.error("Audio play error:", err, link);
+      toast.dismiss();
+      toast.error("Audio playback failed. Check console for details.");
+    });
 
     stopTimerRef.current = setTimeout(() => {
       audio.pause();

@@ -186,8 +186,12 @@ const PremiumAudios = () => {
       || (typeof audio.audioFile === 'string' && /^https?:\/\//i.test(audio.audioFile)
           ? audio.audioFile
           : `${AUDIO_BASE_URL}/uploads/paid-audio/${audio.audioFile}`);
-    const audioElement = new Audio(link);
-    audioElement.play();
+    const audioElement = new Audio();
+    audioElement.crossOrigin = "anonymous";
+    audioElement.src = link;
+    audioElement.play().catch((err) => {
+      console.error("Audio play error:", err, link);
+    });
 
     // Set timeout to stop after 30 seconds
     stopTimerRef.current = setTimeout(() => {

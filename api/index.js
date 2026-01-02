@@ -22,21 +22,31 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // CORS configuration
-const allowedOrigins = [
+const allowedExactOrigins = [
   process.env.CLIENT_ORIGIN,
-  'https://*.vercel.app',
-  'https://*.vercel.app/*',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:5174'
 ].filter(Boolean);
 
+function isAllowedOrigin(origin) {
+  if (!origin) return true; // allow same-origin/non-browser requests
+  try {
+    const { hostname, protocol } = new URL(origin);
+    // Allow configured exact matches
+    if (allowedExactOrigins.includes(origin)) return true;
+    // Allow any *.vercel.app or *.vercel.dev over https
+    const isVercelDomain =
+      protocol === 'https:' && (hostname.endsWith('.vercel.app') || hostname.endsWith('.vercel.dev'));
+    return isVercelDomain;
+  } catch {
+    return false;
+  }
+}
+
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.some(allowedOrigin => 
-      origin === allowedOrigin || 
-      origin.startsWith(allowedOrigin.replace('*', ''))
-    )) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
