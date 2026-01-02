@@ -2,6 +2,8 @@
 
 This document explains how to deploy the Audio Shop project, including where to change URLs for frontend/backend communication, environment variables, and build/run steps.
 
+
+this is hardcoted
 ---
 
 ## 1. Backend Setup
