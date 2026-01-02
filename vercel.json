@@ -5,7 +5,7 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "outputDirectory": "frontend/dist"
+        "distDir": "dist"
       }
     },
     {
@@ -17,6 +17,7 @@
     }
   ],
   "routes": [
+    { "handle": "filesystem" },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
