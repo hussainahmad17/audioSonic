@@ -19,6 +19,9 @@
   "routes": [
     { "handle": "filesystem" },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/(.*)", "dest": "frontend/index.html" }
+    { "src": "/assets/(.*)", "dest": "/frontend/assets/$1" },
+    { "src": "/favicon.ico", "dest": "/frontend/favicon.ico" },
+    { "src": "/vite.svg", "dest": "/frontend/vite.svg" },
+    { "src": "/(.*)", "dest": "/frontend/index.html" }
   ]
 }
