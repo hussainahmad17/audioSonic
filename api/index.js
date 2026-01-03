@@ -84,7 +84,5 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-console.log('MONGO_URI:', process.env.MONGO_URI);
-
 // Vercel serverless function handler
 module.exports = (req, res) => app(req, res);
