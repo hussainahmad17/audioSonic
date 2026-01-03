@@ -187,7 +187,6 @@ const PremiumAudios = () => {
           ? audio.audioFile
           : null);
     if (!link) {
-      toast?.dismiss?.();
       (typeof window !== 'undefined') && alert("This audio is not yet available via secure URL.");
       return;
     }
