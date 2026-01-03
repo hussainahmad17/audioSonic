@@ -1,12 +1,10 @@
 import React from "react";
 import { AuthContext } from "./AuthContext";
-import { apiClient, postRequest } from "@app/backendServices/ApiCalls";
+import { apiClient } from "@app/backendServices/ApiCalls";
 
 export const iAuthService = async (email, password) => {
   const { data } = await apiClient.post("/auth/login", { email, password });
-
   return {
-    token: data.token,
     user: data.user,
     msg: data.message,
   };
@@ -20,17 +18,15 @@ export function AuthProvider({ children }) {
   const login = async ({ email, password }) => {
     setLoading(true);
     try {
-      const { token, user,msg } = await iAuthService(email, password);
-
-      if (token) {
-        localStorage.setItem("token", token);
+      const { user, msg } = await iAuthService(email, password);
+      if (user) {
         localStorage.setItem("user", JSON.stringify(user));
         setUser(user);
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
       }
-      return { token, user,msg };
+      return { user, msg };
     } catch (err) {
       console.error("Login failed:", err);
       setIsAuthenticated(false);
@@ -48,36 +44,21 @@ export function AuthProvider({ children }) {
 
   React.useEffect(() => {
     const checkAuthentication = async () => {
-      const token = localStorage.getItem("token");
-
-      if (token) {
-        setLoading(true);
-
-        postRequest(
-          "/auth/verify",
-          {token},
-          (response) => {
-            console.log("🚀 ~ checkAuthentication ~ response:", response)
-            setLoading(false);
-            if (response?.data?.status === "success") {
-              setUser(response?.data?.user);
-              setIsAuthenticated(true);
-            } else {
-              logout();
-            }
-          },
-          (error) => {
-            setLoading(false);
-            logout();
-            console.error("Token verification failed:", error?.response?.data);
-          }
-        );
-      } else {
+      setLoading(true);
+      try {
+        const { data } = await apiClient.post("/auth/verify", {});
+        if (data?.status === "success") {
+          setUser(data.user);
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
         setIsAuthenticated(false);
+      } finally {
         setLoading(false);
       }
     };
-
     checkAuthentication();
   }, []);
 
