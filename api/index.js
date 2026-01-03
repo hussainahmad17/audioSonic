@@ -5,13 +5,13 @@ const path = require('path');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-// Import routes
-const authRoutes = require('../backend/src/routes/authRoutes');
-const categoriesRoutes = require('../backend/src/routes/categoriesRoutes');
-const FreeAudioRoutes = require('../backend/src/routes/freeAudio');
-const PaidAudioRoutes = require('../backend/src/routes/paidAudio');
-const SubcategoriesRoutes = require('../backend/src/routes/subCategoriesRoutes');
-const CustomAudioRoutes = require('../backend/src/routes/CustomAudioRoutes');
+// Import routes (use local api backend to avoid bundling root backend)
+const authRoutes = require('./backend/src/routes/authRoutes');
+const categoriesRoutes = require('./backend/src/routes/categoriesRoutes');
+const FreeAudioRoutes = require('./backend/src/routes/freeAudio');
+const PaidAudioRoutes = require('./backend/src/routes/paidAudio');
+const SubcategoriesRoutes = require('./backend/src/routes/subCategoriesRoutes');
+const CustomAudioRoutes = require('./backend/src/routes/CustomAudioRoutes');
 
 // Initialize express app
 const app = express();
@@ -55,8 +55,7 @@ app.use(cors({
   credentials: true
 }));
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '..', 'backend', 'uploads')));
+// Do not serve local uploads on Vercel; files are hosted on Cloudinary
 
 // API Routes
 app.use('/api/auth', authRoutes);

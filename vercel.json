@@ -12,7 +12,13 @@
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["backend/src/**"]
+        "includeFiles": ["api/backend/src/**"],
+        "excludeFiles": [
+          "backend/**",
+          "frontend/**",
+          "uploads/**",
+          "**/*.map" 
+        ]
       }
     }
   ],
