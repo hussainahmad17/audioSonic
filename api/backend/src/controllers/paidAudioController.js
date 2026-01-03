@@ -70,12 +70,12 @@ const getAllAudios = async (req, res) => {
             .populate("categoryId", "categoryName")
             .populate("subCategoryId", "Name")
             .sort({ createdAt: -1 });
-        const origin = `${req.protocol}://${req.get('host')}`;
+        const origin = process.env.BASE_URL || `https://${req.get('host')}`;
         const audiosWithUrl = audios.map(audio => ({
             ...audio.toObject(),
             audioUrl: (audio.audioFile && /^https?:\/\//i.test(audio.audioFile))
                 ? audio.audioFile
-                : `${origin}/uploads/paid-audio/${audio.audioFile}`
+                : null // do not point to local uploads on Vercel
         }));
         const totalRevenue = audiosWithUrl.reduce((sum, audio) => sum + (audio.revenue || 0), 0);
         const totalDownloads = audiosWithUrl.reduce((sum, audio) => sum + (audio.downloads || 0), 0);
@@ -178,9 +178,22 @@ const handleConfirm = async (req, res) => {
         if (!audio) return res.status(404).json({ error: 'Audio not found' });
         audio.downloads += 1;
         await audio.save();
-        const origin = `${req.protocol}://${req.get('host')}`;
-        const audioUrl = (audio.audioFile && /^https?:\/\//i.test(audio.audioFile)) ? audio.audioFile : `${origin}/uploads/paid-audio/${audio.audioFile}`;
+        const origin = process.env.BASE_URL || `https://${req.get('host')}`;
+        const audioUrl = (audio.audioFile && /^https?:\/\//i.test(audio.audioFile)) ? audio.audioFile : null;
         await PaidAudioPurchase.create({ email: customerEmail, audioId: audio._id, amount: session.amount_total / 100, date: new Date() });
+        if (!audioUrl) {
+            return res.status(200).json({
+                audio: {
+                    _id: audio._id,
+                    title: audio.title,
+                    description: audio.description,
+                    audioFile: audio.audioFile,
+                    priceAmount: audio.priceAmount,
+                    duration: audio.duration
+                },
+                message: 'Payment confirmed, but audio file is not yet hosted on cloud storage. Please migrate this item.'
+            });
+        }
         await sendEmailWithAudio({ email: customerEmail, audioId: audio._id, audioTitle: audio.title, audioDescription: audio.description, audioUrl });
         res.json({ audio: { _id: audio._id, title: audio.title, description: audio.description, audioFile: audio.audioFile, priceAmount: audio.priceAmount, duration: audio.duration } });
     } catch (error) {

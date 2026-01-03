@@ -185,7 +185,12 @@ const PremiumAudios = () => {
     const link = audio.audioUrl
       || (typeof audio.audioFile === 'string' && /^https?:\/\//i.test(audio.audioFile)
           ? audio.audioFile
-          : `${AUDIO_BASE_URL}/uploads/paid-audio/${audio.audioFile}`);
+          : null);
+    if (!link) {
+      toast?.dismiss?.();
+      (typeof window !== 'undefined') && alert("This audio is not yet available via secure URL.");
+      return;
+    }
     const audioElement = new Audio();
     audioElement.crossOrigin = "anonymous";
     audioElement.src = link;

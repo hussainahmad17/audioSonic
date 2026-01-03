@@ -96,7 +96,12 @@ const SampleCards = () => {
       clearTimeout(stopTimerRef.current);
     }
 
-    const link = sample.audioUrl || `${AUDIO_BASE_URL}/uploads/free-audio/${sample.audioFile}`;
+    const link = sample.audioUrl || (typeof sample.audioFile === 'string' && /^https?:\/\//i.test(sample.audioFile) ? sample.audioFile : null);
+    if (!link) {
+      toast.dismiss();
+      toast.error("This audio is not yet available via secure URL.");
+      return;
+    }
     const audio = new Audio();
     audio.crossOrigin = "anonymous";
     audio.src = link;
@@ -149,7 +154,7 @@ const SampleCards = () => {
           audioId: sample._id,
           audioTitle: sample.title,
           audioDescription: sample.description,
-          audioUrl: sample.audioUrl || `${AUDIO_BASE_URL}/uploads/free-audio/${sample.audioFile}`,
+          audioUrl: sample.audioUrl || (typeof sample.audioFile === 'string' && /^https?:\/\//i.test(sample.audioFile) ? sample.audioFile : null),
         },
         (response) => {
           if (response?.data?.success) {

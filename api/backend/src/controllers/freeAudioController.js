@@ -33,8 +33,14 @@ const addAudio = async (req, res) => {
 const getAllAudios = async (req, res) => {
     try {
         const audios = await FreeAudio.find().populate("categoryId", "categoryName").populate("subCategoryId", "Name").sort({ createdAt: -1 });
-        const origin = `${req.protocol}://${req.get('host')}`;
-        const audiosWithUrl = audios.map(audio => ({ ...audio.toObject(), audioUrl: (audio.audioFile && /^https?:\/\//i.test(audio.audioFile)) ? audio.audioFile : `${origin}/uploads/free-audio/${audio.audioFile}`, duration: audio.duration }));
+        const origin = process.env.BASE_URL || `https://${req.get('host')}`;
+        const audiosWithUrl = audios.map(audio => ({
+            ...audio.toObject(),
+            audioUrl: (audio.audioFile && /^https?:\/\//i.test(audio.audioFile))
+                ? audio.audioFile
+                : null, // do not point to local uploads on Vercel
+            duration: audio.duration
+        }));
         return res.status(200).json({ success: true, data: audiosWithUrl });
     } catch (error) { console.error("Error fetching free audios:", error); return res.status(500).json({ message: "Internal server error" }); }
 }
@@ -73,8 +79,9 @@ const sendAudioEmail = async (req, res) => {
     try {
         const transporter = nodemailer.createTransport({ service: 'Gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
         const origin = `${req.protocol}://${req.get('host')}`;
-        const directLink = (audioUrl && /^https?:\/\//i.test(audioUrl)) ? audioUrl : `${origin}/uploads/free-audio/${audioUrl}`;
+        const directLink = (audioUrl && /^https?:\/\//i.test(audioUrl)) ? audioUrl : null;
         const htmlContent = `<div style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; color: #333;"><div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0;"><h2 style="color: #2c3e50; margin-bottom: 10px;">🎧 ${audioTitle}</h2><p style="margin-bottom: 15px;">${audioDescription || "Enjoy your free audio file from our collection!"}</p><hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;"><p>Click the button below to <strong>download</strong> your audio:</p><p><a href="${directLink}" style="background-color: #28a745; color: #ffffff; padding: 10px 16px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">🎵 Open Audio</a></p><p style="color: #777; font-size: 14px;">If the button doesn’t work, copy and paste this link into your browser:</p><p style="word-break: break-all; font-size: 14px;"><a href="${directLink}" style="color: #0066cc;">${directLink}</a></p><hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;"><p style="font-size: 14px; color: #777;">Thank you for using our service! We hope you enjoy your audio experience.</p></div></div>`;
+        if (!directLink) return res.status(400).json({ success: false, message: "Audio URL is invalid. This item may require migration to cloud storage." });
         const mailOptions = { from: `"Free Audio Service" <${process.env.EMAIL_USER}>`, to: email, subject: `Your Free Audio: ${audioTitle}`, html: htmlContent, attachments: [{ filename: `${audioTitle}.mp3`, path: directLink, contentType: "audio/mpeg" }] };
         await FreeAudioDownload.create({ email, audioId: req.body.audioId, date: new Date() });
         await transporter.sendMail(mailOptions);
