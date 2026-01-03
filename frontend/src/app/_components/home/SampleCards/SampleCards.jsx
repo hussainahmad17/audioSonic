@@ -98,7 +98,6 @@ const SampleCards = () => {
 
     const link = sample.audioUrl || (typeof sample.audioFile === 'string' && /^https?:\/\//i.test(sample.audioFile) ? sample.audioFile : null);
     if (!link) {
-      toast.dismiss();
       toast.error("This audio is not yet available via secure URL.");
       return;
     }
@@ -107,7 +106,6 @@ const SampleCards = () => {
     audio.src = link;
     audio.play().catch((err) => {
       console.error("Audio play error:", err, link);
-      toast.dismiss();
       toast.error("Audio playback failed. Check console for details.");
     });
 
@@ -134,12 +132,10 @@ const SampleCards = () => {
   // Email Submit
   const handleEmailSubmit = async (sample) => {
     if (!email) {
-      toast.dismiss();
       toast.error("Please enter your email address");
       return;
     }
     if (!consentChecked) {
-      toast.dismiss();
       toast.error("Please agree to share your email");
       return;
     }
@@ -158,7 +154,6 @@ const SampleCards = () => {
         },
         (response) => {
           if (response?.data?.success) {
-            toast.dismiss();
             toast.success("Full audio has been sent to your email!", {
               onClose: () => {
                 setActiveCard(null);
@@ -167,21 +162,18 @@ const SampleCards = () => {
               },
             });
           } else {
-            toast.dismiss();
             toast.error("Failed to send email. Please try again.");
           }
           setSendingId(null); // 🔑 stop loader AFTER response
         },
         (error) => {
           console.error("Email send error:", error);
-          toast.dismiss();
           toast.error("Error sending email. Please try again later.");
           setSendingId(null); // 🔑 stop loader AFTER error
         }
       );
     } catch (error) {
       console.error("Unexpected error:", error);
-      toast.dismiss();
       toast.error("Error sending email. Please try again later.");
       setSendingId(null); // 🔑 stop loader AFTER unexpected failure
     }
