@@ -64,14 +64,29 @@ apiClient.interceptors.request.use(
   }
 );
 
+const handleUnauthorized = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const currentPath = window.location.pathname || "/";
+  const targetPath = currentPath.startsWith("/admin") ? "/auth/login" : "/";
+
+  if (currentPath !== targetPath) {
+    window.location.href = targetPath;
+  }
+};
+
 // Response interceptor to handle token expiration
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem("token");
-      window.location.href = "/";
+      const hasToken = typeof window !== "undefined" && localStorage.getItem("token");
+      if (hasToken) {
+        localStorage.removeItem("token");
+        handleUnauthorized();
+      }
     }
     return Promise.reject(error);
   }
