@@ -50,6 +50,44 @@ const apiClient = axios.create({
   withCredentials: true, // Important for cookies
 });
 
+const trimSlashes = (value = "") => value.replace(/^\/+/g, "").replace(/\/+$/g, "");
+
+export const buildMediaUrl = (source, { folder } = {}) => {
+  if (!source || typeof source !== "string") {
+    return null;
+  }
+
+  const sanitizedSource = source.trim();
+  if (!sanitizedSource) {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(sanitizedSource)) {
+    return sanitizedSource;
+  }
+
+  if (sanitizedSource.startsWith("//")) {
+    return `https:${sanitizedSource}`;
+  }
+
+  const base = AUDIO_BASE_URL.replace(/\/$/, "");
+
+  if (sanitizedSource.startsWith("/")) {
+    return `${base}${sanitizedSource}`;
+  }
+
+  let relativePath = sanitizedSource.replace(/^\.\/+/, "");
+  if (/^uploads\//i.test(relativePath)) {
+    return `${base}/${trimSlashes(relativePath)}`;
+  }
+
+  const folderSegment = folder
+    ? `uploads/${trimSlashes(folder)}`
+    : "uploads";
+
+  return `${base}/${folderSegment}/${trimSlashes(relativePath)}`;
+};
+
 // Request interceptor to add authorization header
 apiClient.interceptors.request.use(
   (config) => {

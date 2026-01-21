@@ -12,7 +12,7 @@ import {
   Loader2
 } from "lucide-react";
 import axios from "axios";
-import { API_BASE_URL, AUDIO_BASE_URL } from "@app/backendServices/ApiCalls";
+import { API_BASE_URL, AUDIO_BASE_URL, buildMediaUrl } from "@app/backendServices/ApiCalls";
 
 // API configuration (env-driven for Vercel/local)
 const API_URL = API_BASE_URL;
@@ -170,6 +170,12 @@ const PremiumAudios = () => {
   }, {});
 
   // Handle audio preview
+  const resolvePaidUrl = useCallback(
+    (audio) =>
+      audio.audioUrl || buildMediaUrl(audio.audioFile, { folder: "paid-audio" }),
+    []
+  );
+
   const handlePlay = useCallback((audio, idx) => {
     // Stop any currently playing audio
     if (audioRef.current) {
@@ -182,10 +188,7 @@ const PremiumAudios = () => {
     }
 
     // Resolve audio URL: prefer server-provided URL or cloud URL; fallback to static uploads
-    const link = audio.audioUrl
-      || (typeof audio.audioFile === 'string' && /^https?:\/\//i.test(audio.audioFile)
-          ? audio.audioFile
-          : null);
+    const link = resolvePaidUrl(audio);
     if (!link) {
       (typeof window !== 'undefined') && alert("This audio is not yet available via secure URL.");
       return;
@@ -205,7 +208,7 @@ const PremiumAudios = () => {
 
     audioRef.current = audioElement;
     setPlayingIndex(idx);
-  }, []);
+  }, [resolvePaidUrl]);
 
   // Stop audio playback
   const handleStop = () => {

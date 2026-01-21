@@ -13,6 +13,7 @@ import {
 import {
   API_BASE_URL,
   AUDIO_BASE_URL,
+  buildMediaUrl,
   getRequest,
   postRequest,
 } from "@app/backendServices/ApiCalls";
@@ -87,6 +88,9 @@ const SampleCards = () => {
   };
 
   // Audio Play
+  const resolveSampleUrl = (sample) =>
+    sample.audioUrl || buildMediaUrl(sample.audioFile, { folder: "free-audio" });
+
   const handlePlay = (sample) => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -96,7 +100,7 @@ const SampleCards = () => {
       clearTimeout(stopTimerRef.current);
     }
 
-    const link = sample.audioUrl || (typeof sample.audioFile === 'string' && /^https?:\/\//i.test(sample.audioFile) ? sample.audioFile : null);
+    const link = resolveSampleUrl(sample);
     if (!link) {
       toast.error("This audio is not yet available via secure URL.");
       return;
@@ -150,7 +154,7 @@ const SampleCards = () => {
           audioId: sample._id,
           audioTitle: sample.title,
           audioDescription: sample.description,
-          audioUrl: sample.audioUrl || (typeof sample.audioFile === 'string' && /^https?:\/\//i.test(sample.audioFile) ? sample.audioFile : null),
+          audioUrl: resolveSampleUrl(sample),
         },
         (response) => {
           if (response?.data?.success) {
