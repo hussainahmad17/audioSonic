@@ -55,7 +55,14 @@ app.use(cors({
   credentials: true
 }));
 
-// Do not serve local uploads on Vercel; files are hosted on Cloudinary
+const uploadsRoot = path.join(__dirname, 'backend', 'uploads');
+const freeUploadsDir = path.join(uploadsRoot, 'free-audio');
+const paidUploadsDir = path.join(uploadsRoot, 'paid-audio');
+
+// Serve bundled uploads to keep legacy audio references working in production
+app.use('/uploads', express.static(uploadsRoot));
+app.use('/free-audios', express.static(freeUploadsDir));
+app.use('/paid-audios', express.static(paidUploadsDir));
 
 // API Routes
 app.use('/api/auth', authRoutes);

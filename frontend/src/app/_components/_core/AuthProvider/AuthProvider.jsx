@@ -44,6 +44,14 @@ export function AuthProvider({ children }) {
 
   React.useEffect(() => {
     const checkAuthentication = async () => {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+      if (!token) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         const { data } = await apiClient.post("/auth/verify", {});
