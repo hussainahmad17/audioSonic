@@ -55,7 +55,7 @@ app.use(cors({
   credentials: true
 }));
 
-const uploadsRoot = path.join(__dirname, 'backend', 'uploads');
+const uploadsRoot = path.join(__dirname, '..', 'backend', 'uploads');
 const freeUploadsDir = path.join(uploadsRoot, 'free-audio');
 const paidUploadsDir = path.join(uploadsRoot, 'paid-audio');
 
