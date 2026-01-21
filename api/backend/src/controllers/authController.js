@@ -4,6 +4,29 @@ const asyncHdlr = require("../middlewares/asyncHandler");
 const User = require('../models/User');
 const { v4: uuidv4 } = require("uuid");
 
+const normalizeEmail = (value = "") => value.trim().toLowerCase();
+
+const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const findUserByEmailInsensitive = async (rawEmail) => {
+  const normalizedEmail = normalizeEmail(rawEmail);
+  if (!normalizedEmail) {
+    return { normalizedEmail, user: null };
+  }
+
+  let user = await User.findOne({ email: normalizedEmail });
+  if (!user) {
+    const regex = new RegExp(`^${escapeRegex(normalizedEmail)}$`, "i");
+    user = await User.findOne({ email: regex });
+    if (user && user.email !== normalizedEmail) {
+      user.email = normalizedEmail;
+      await user.save();
+    }
+  }
+
+  return { normalizedEmail, user };
+};
+
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
@@ -27,11 +50,19 @@ const register = asyncHdlr(async (req, res) => {
       return res.status(400).json({ success: false, message: "Passwords do not match" });
     }
 
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      const message = existingUser.email === email ? "Email already exists" : "Username already taken";
-      return res.status(400).json({ success: false, message });
-    }
+      const { normalizedEmail, user: emailOwner } = await findUserByEmailInsensitive(email);
+      if (!normalizedEmail) {
+        return res.status(400).json({ success: false, message: "Email is required" });
+      }
+
+      if (emailOwner) {
+        return res.status(400).json({ success: false, message: "Email already exists" });
+      }
+
+      const existingUsername = await User.findOne({ username });
+      if (existingUsername) {
+        return res.status(400).json({ success: false, message: "Username already taken" });
+      }
 
     let referredByUser = null;
     if (referredByCode) {
@@ -48,7 +79,7 @@ const register = asyncHdlr(async (req, res) => {
       firstName,
       lastName,
       username,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       referredBy: referredByUser ? referredByUser._id : null,
       referralCode,
@@ -69,7 +100,10 @@ const register = asyncHdlr(async (req, res) => {
 const login = asyncHdlr(async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ success: false, message: "Email and password are required" });
-  const user = await User.findOne({ email });
+
+  const { normalizedEmail, user } = await findUserByEmailInsensitive(email);
+  if (!normalizedEmail) return res.status(400).json({ success: false, message: "Email is required" });
+
   if (!user) return res.status(401).json({ success: false, message: "Invalid email or password" });
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(401).json({ success: false, message: "Invalid email or password" });
