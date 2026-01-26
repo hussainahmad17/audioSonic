@@ -1,9 +1,21 @@
 import useSWR from 'swr';
 import { apiClient } from '@app/backendServices/ApiCalls';
 
+const normalizePayload = (payload) => {
+  if (Array.isArray(payload)) {
+    return { data: payload };
+  }
+
+  if (payload && typeof payload === 'object') {
+    return payload;
+  }
+
+  return { data: payload };
+};
+
 const defaultFetcher = async (url) => {
   const res = await apiClient.get(url);
-  return res.data;
+  return normalizePayload(res.data);
 };
 
 export function useApiSWR(key, fetcher = defaultFetcher, options = {}) {
