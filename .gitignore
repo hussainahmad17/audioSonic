@@ -12,11 +12,6 @@ pnpm-debug.log*
 # Environment Variables
 #################################
 
-.env
-.env.local
-.env.development
-.env.production
-.env.test
 
 #################################
 # Logs
@@ -63,7 +58,6 @@ build/
 .DS_Store
 Thumbs.db
 
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -76,3 +70,7 @@ Thumbs.db
 *.db
 .vercel
 .env*.local
+config.bat
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
