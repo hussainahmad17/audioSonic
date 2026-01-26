@@ -58,7 +58,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoriesRoutes)
 app.use("/api/sub-categories", SubcategoriesRoutes)
 app.use("/api/free-audio", FreeAudioRoutes);
+app.use("/api/free-audios", FreeAudioRoutes);
 app.use("/api/paid-audio", PaidAudioRoutes);
+app.use("/api/paid-audios", PaidAudioRoutes);
 app.use("/api/custom-audio", CustomAudioRoutes);
 // app.use("/api/reports", ReportRoutes);
 
